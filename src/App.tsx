@@ -15,6 +15,17 @@ function App() {
   const [isMuted, setIsMuted] = useState(false);
   const [damageFlash, setDamageFlash] = useState(false);
   const [selectedShip, setSelectedShip] = useState<'f15' | 'f22' | 'su57'>('f15');
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile viewport or touch capability
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768 || 'ontouchstart' in window);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Initialize game on canvas mount
   useEffect(() => {
@@ -176,22 +187,37 @@ function App() {
             </p>
 
             <div className="control-guide">
-              <div className="control-row">
-                <span>Steer Ship:</span>
-                <span>
-                  <span className="key-cap">A</span> / <span className="key-cap">D</span> or <span className="key-cap">←</span> / <span className="key-cap">→</span>
-                </span>
-              </div>
-              <div className="control-row">
-                <span>Mouse / Touch:</span>
-                <span>Drag Left / Right</span>
-              </div>
-              <div className="control-row">
-                <span>Fire Lasers:</span>
-                <span>
-                  <span className="key-cap">Spacebar</span> or <span className="key-cap">Tap Screen</span>
-                </span>
-              </div>
+              {isMobile ? (
+                <>
+                  <div className="control-row">
+                    <span>Steer Ship:</span>
+                    <span className="glow-cyan" style={{ fontWeight: 600 }}>Swipe Left / Right</span>
+                  </div>
+                  <div className="control-row">
+                    <span>Fire Lasers:</span>
+                    <span className="glow-pink" style={{ fontWeight: 600 }}>Tap Screen</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="control-row">
+                    <span>Steer Ship:</span>
+                    <span>
+                      <span className="key-cap">A</span> / <span className="key-cap">D</span> or <span className="key-cap">←</span> / <span className="key-cap">→</span>
+                    </span>
+                  </div>
+                  <div className="control-row">
+                    <span>Mouse / Touch:</span>
+                    <span>Drag Left / Right</span>
+                  </div>
+                  <div className="control-row">
+                    <span>Fire Lasers:</span>
+                    <span>
+                      <span className="key-cap">Spacebar</span> or <span className="key-cap">Tap Screen</span>
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="ship-selector-title">Select Cyber Jet</div>
