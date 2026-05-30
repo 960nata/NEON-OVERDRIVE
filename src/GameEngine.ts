@@ -134,7 +134,10 @@ export class GameEngine {
     this.scene = new THREE.Scene();
     this.scene.fog = new THREE.FogExp2(0x050110, 0.007);
 
-    this.camera = new THREE.PerspectiveCamera(65, width / height, 0.1, 300);
+    const aspect = width / height;
+    // Increase Field of View (FOV) on portrait/mobile screens so elements don't appear zoomed in too close
+    const initialFov = aspect < 1 ? 65 + (1 - aspect) * 22 : 65;
+    this.camera = new THREE.PerspectiveCamera(initialFov, aspect, 0.1, 300);
     this.camera.position.set(0, 0, 4);
     this.originalCameraPos.copy(this.camera.position);
 
@@ -482,7 +485,9 @@ export class GameEngine {
     window.addEventListener('pointerup', this.handlePointerUp);
     window.addEventListener('pointercancel', this.handlePointerUp);
     
+    // Prevent default touch interactions to block page scrolling and pull-to-refresh gestures during play
     this.canvas.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+    this.canvas.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
   }
 
   private cleanupInput() {
@@ -1292,7 +1297,17 @@ export class GameEngine {
 
     this.renderer.setSize(width, height, false);
     
-    this.camera.aspect = width / height;
+    const aspect = width / height;
+    this.camera.aspect = aspect;
+    
+    // Dynamically expand Field of View (FOV) when screen is rotated to portrait/vertical (aspect < 1)
+    // This pushes objects further out visually so they don't block the screen
+    if (aspect < 1) {
+      this.camera.fov = 65 + (1 - aspect) * 22;
+    } else {
+      this.camera.fov = 65;
+    }
+    
     this.camera.updateProjectionMatrix();
   }
 
